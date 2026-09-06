@@ -1,0 +1,311 @@
+# Proyecto Práctico - Programación Avanzada: Sistemas de Monitoreo Biomédico
+
+En este proyecto desarrollará componentes esenciales para un sistema de procesamiento de datos de sensores biomédicos. El proyecto simula un escenario real donde un ingeniero debe procesar lecturas de múltiples sensores para evaluar los signos vitales de pacientes en una unidad de cuidados intensivos.
+
+## Enunciado del Problema
+
+El Hospital Universitario requiere un sistema para procesar datos recopilados de sensores biomédicos. Estos sensores monitorean constantemente a pacientes en la UCI y generan archivos de datos que deben ser analizados para detectar anomalías en los signos vitales.
+
+Los datos de los sensores se almacenan en archivos `.bsf` (Biomedical Sensor Format), que contienen las lecturas en el siguiente formato binario:
+
+### Estructura Sala de UCI
+
+- **ID de la sala** (1 byte): Identifica la sala de UCI donde se encuentran los pacientes.
+- **Número de máquinas** (1 byte): Cantidad de máquinas que están monitoreando a los pacientes en la sala.
+- **Máquinas** (variable): Un arreglo dinámico de máquinas. Cada máquina tiene un número único y puede monitorear múltiples pacientes.
+
+### Estructura Máquina de UCI
+
+- **Id** (1 byte): Identifica la máquina que está monitoreando al paciente. Cada máquina tiene un número único.
+- **Número de mediciones** (4 bytes): Cantidad de mediciones que se están realizando. Cada máquina puede tener múltiples mediciones.
+- **Mediciones** (variable): Un arreglo dinámico de mediciones. Cada medición contiene información sobre el paciente y las lecturas de los sensores.
+
+### Estructura de medición
+
+- **ID del Paciente** (1 byte): Código único que identifica al paciente monitoreado. Este código será de 1 caracteres y corresponde al id del paciente.
+- **Fecha y Hora** (24 bytes): Momento exacto de la lectura en formato "DD/MM/AAAA HH:MM:ss.sss".
+- **Número de Lecturas** (4 bytes): Cantidad de lecturas almacenadas a continuación. El período de lectura varía dependiendo del tipo de sensor, por lo que a una misma hora puede tener distintas lecturas de varios tipos.
+- **Lecturas** (variable): Un arreglo dinámico de lecturas.
+
+### Estructura de Lectura
+
+- **Tipo de Sensor** (1 byte): Identifica el tipo de sensor: 'T' (temperatura), 'P' (presión arterial), 'E' (ECG), 'O' (oxímetro).
+- **Valor de medida** (4bytes / 8 bytes): Cada lectura consta de un valor double (8 bytes) que representa la medición del sensor. La interpretación depende del tipo de sensor:
+  - Temperatura (°C) - Se almacena un solo valor de 8 bytes.
+  - Presión arterial (mmHg) - Se almacenan dos valores consecutivos: sistólica y diastólica (4 bytes cada uno).
+  - ECG (mV) - Se almacena un solo valor de 8 bytes.
+  - Oximetría (% de saturación de oxígeno) - Se almacena un solo valor de 8 bytes.
+
+Su tarea es desarrollar un programa en C++ que pueda procesar estos archivos y generar reportes útiles para el personal médico.
+
+Este sistema se va a ejecutar en una pequeña computadora con linux, por lo que el manejo de la memoria debe ser muy eficiente. Siendo de esta manera, solamente se permitirá el uso del tipo string para separar en tokens los archivos de texto. En el sistema no se podrá usar el tipo string para almacenar los datos, ya que se utilizarán arreglos dinámicos para almacenar las lecturas de los sensores.
+
+En la computadora, existirá un archivo de configuración llamado `configuracion.txt` que contiene los umbrales de alarma para cada tipo de sensor. El formato del archivo es el siguiente (Los comentarios comienzan con `#` y no estarán en el archivo real):
+
+```csv
+# Configuración de umbrales para sensores biomédicos
+# Formato: TIPO_SENSOR,MIN,MAX
+T,36.0,38.0
+P_SIS,90,140
+P_DIA,60,90
+E,-3.858747,1.228621
+O,95,100
+```
+
+Este archivo contiene los límites inferior y superior para cada tipo de sensor. El sistema debe cargar estos umbrales al inicio y utilizarlos para detectar anomalías en las lecturas de los pacientes.
+
+Adicionalmente, existirá un archivo de texto con los datos de los pacientes de la clínica, que no necesariamente pertenecen a la UCI. Este archivo se llamará `pacientes.csv` y tendrá el siguiente formato:
+
+```csv
+# id; tipoDeDocumento; documento; nombres; apellidos; fechaNacimiento; telefono; email; tipoDeSangre; entidadSalud; medicinaPrepagada
+
+1; CC; 123456789; Juan; Pérez; 01/01/1980; 3001234567; juan.perez@example.com; A+; Medimas; Sura
+2; TI; 987654321; María; Gómez; 15/05/1990; 3109876543; maría.gómez@example.com; O+; Coomeva;
+3; CE; 456789123; Carlos; López; 20/10/1975; 3204567890; carlos.lopez@example.com; B+; Sanitas; Colsanitas
+```
+
+## Tareas a Implementar
+
+El proyecto se ha dividido en entregas semanales (cada semana será un sprint). A continuación, se indica las tareas que debe implementar en cada entrega.
+
+
+>
+> Cualquier código que contenga referencias a la clase Vector o similares no será aceptado, ya que se debe utilizar arreglos dinámicos.
+
+### Entrega semana 4 (sprint 1) [Taller de cadenas de caracteres y estructuras]
+
+- **(15 puntos) Definición de Estructuras:**
+   Defina las estructuras necesarias para representar:
+
+  - Una lectura de sensor individual
+  - Una medición de un paciente
+  - Una máquina de UCI
+  - Una sala de UCI
+  - La información del archivo de configuración
+  - La información de un paciente
+  - La información de un archivo de pacientes
+   
+>[!NOTE]
+> Cada estructura debe estar dentro de la carpeta libs y debe tener su propio archivo de cabecera.
+
+- **(5 puntos) Menú Principal:**
+   Implemente un menú principal que permita al usuario seleccionar entre las siguientes opciones:
+  - Cargar archivo de configuración y datos de pacientes
+  - Leer archivo `.bsf`
+  - Generar reporte de anomalías
+  - Calcular estadísticas
+  - Exportar datos procesados
+  - Salir
+   
+>[!NOTE]
+> El menú debe ser interactivo y permitir al usuario seleccionar opciones mediante un número. No es necesario que, en este sprint, se implemente la funcionalidad de cada opción, solo el menú y la estructura básica del programa.
+
+- **(20 puntos) Separar el archivo de configuración:**
+   Desarrolle una función que reciba como parámetro una línea de texto del archivo de configuración, separe los valores y se guarden en un arreglo de caracteres. La función debe retornar un arreglo con los valores de configuración.
+
+- **(20 puntos) Separar el archivo de pacientes:**
+   Implemente una función que reciba una línea de texto del archivo de pacientes, separe los valores y los guarde en un arreglo de caracteres. La función debe retornar un arreglo con los datos del paciente.
+
+- **(25 puntos) De cadenas a estructuras:**
+   Desarrolle una función que reciba un arreglo de cadenas de caracteres (estas serán las líneas del archivo de configuración o de pacientes, según como corresponda) y cargue los datos en las estructuras definidas anteriormente.
+
+- **(15 puntos) Comparar dos fechas:**
+   Implemente una función que compare dos fechas en formato "DD/MM/AAAA HH:MM:ss.sss" y retorne verdadero si la primera fecha es mayor que la segunda, o falso en caso contrario. Esta función será útil para ordenar las lecturas de los pacientes.
+
+>[!NOTE]
+> Para todos los casos genere código de prueba que permita verificar el correcto funcionamiento de las funciones implementadas.
+
+### Entrega semana 4 (sprint 2) [Taller de archivos de texto]
+
+- **(40 puntos) Lectura de Archivos de configuración y de pacientes:**
+   Desarrolle una función que lea un archivo de configuración y de pacientes; y cargue los datos en las estructuras definidas anteriormente.
+
+- **(25 puntos) Detección de Anomalía en un paciente a partir de una lectura:**
+   Implemente una función que analice una lectura de un paciente, distinta a ECG, y detecte si hay anomalías en los datos. La función debe utilizar los límites definidos en el archivo de configuración para determinar si una lectura es anormal.
+
+- **(35 puntos) Reporte de Mediciones de un Paciente:**
+   Implemente una función que genere un archivo de texto (`mediciones_paciente_<idDePaciente>.txt`) que contenga todas las lecturas de un paciente específico, ordenadas cronológicamente y agrupadas por tipo de sensor, debe indicar si una lectura es anómala o normal. El formato debe ser claro y legible para el personal médico y debe incluir las mediciones de todos los sensores. Para ECG no es necesario incluir la detección de anomalía, solo se debe incluir el valor de la medición.
+   Al final de las lecturas de cada tipo de sensor, debe incluir las estadísticas básicas (mínimo, máximo, promedio) de las lecturas.
+
+>[!NOTE]
+> Para el caso del reporte de mediciones, cree mediciones de prueba dentro de su código para verificar el correcto funcionamiento de la función. No es necesario que se lean de un archivo, pero sí que se simule el formato correcto de las lecturas.
+
+### Entrega semana 5 (sprint 3) [Taller de archivos binarios]
+
+- **(30 puntos) Lectura de Archivos BSF:**
+   Desarrolle una función que lea un archivo binario `.bsf` y cargue los datos en las estructuras definidas anteriormente. La función debe manejar correctamente los diferentes tipos de sensores y las mediciones asociadas a cada paciente.
+
+- **(30 puntos) Reporte de Anomalías para todos los pacientes:**
+   Implemente una función que genere un archivo de texto (`anomalias.txt`) que liste todas las lecturas anómalas (excepto ECG), agrupadas por paciente y ordenados cronológicamente. El formato debe ser claro y legible para el personal médico.
+
+- **(20 puntos) Detección de Anomalía en ECG:**
+   Implemente una función que analice las lecturas de ECG de un paciente y detecte si hay anomalías en los datos. Un ECG tiene anomalías si la suma de los valores absolutos de la mínima y la máxima medición es mayor que la suma de los valores absolutos de los límites inferior y superior del ECG definidos en el archivo de configuración.
+
+- **(20 puntos) Exportación de Pacientes con ECG Anómalo:**
+   Desarrolle una función que genere un archivo binario con los pacientes que tienen un ECG anómalo. El archivo debe llamarse `pacientes_ecg_anomalos.dat` y tener el siguiente formato:
+
+   - **ID del Paciente** (11 bytes): Código único que identifica al paciente.
+   - **Número de Mediciones ECG** (4 bytes): Cantidad de mediciones de ECG que tiene el paciente.
+   - **Mediciones ECG** (variable): Un arreglo dinámico de mediciones de ECG, donde cada medición contiene:
+     - **Fecha y Hora** (24 bytes): Momento exacto de la lectura en formato "DD/MM/AAAA HH:MM:ss.sss".
+     - **Valor de Medida** (8 bytes): Valor de la medición de ECG.
+
+> [!NOTE]
+> En este caso, tendrá un archivo pequeño de lecturas y de pacientes con los que podrá probar el funcionamiento de la lectura de archivos binarios y de texto. Para la entrega final, el archivo será bastante más grande.
+> 
+> En el caso de las lecturas de ECG, tendrá las mediciones de un paciente con un ECG anómalo y otro con un ECG normal. De esta manera, podrá probar el correcto funcionamiento de la detección de anomalías en ECG y la exportación de pacientes con ECG anómalo.
+
+### Entrega semana 7 (sprint 4) [Taller de arreglos dinámicos]
+
+- **(100 puntos) Implementación de Arreglos Dinámicos:**
+   En su proyecto, todos los arreglos deben ser dinámicos. Haga los cambios necesarios en las estructuras y funciones para que utilicen arreglos dinámicos en lugar de arreglos estáticos. No se permite el uso de la clase `std::vector` ni ninguna otra clase de la STL que maneje arreglos dinámicos. Tampoco podrá poner un tamaño fijo a los arreglos, ya que el tamaño de los datos puede variar dependiendo del archivo que se esté procesando, su código debe funcionar para cualquier tamaño de archivo.
+
+### Entrega semana 7 (sprint 5, final) [Pruebas en Orange Pi/ Raspberry Pi / Compuatdor con Linux / Máquina Virtual]
+
+Durante esta semana, se comprobará que el código funciona correctamente en una Raspberry Pi o en una máquina virtual con Linux. Se espera que el código se compile y ejecute sin errores, y que todas las funcionalidades implementadas funcionen correctamente. Se revisarán las siguientes funcionalidades:
+
+- Lectura de archivos de configuración y de pacientes. (20 puntos)
+- Lectura de archivos `.bsf`. (20 puntos)
+- Generación de reportes de anomalías. (20 puntos)
+- Cálculo de estadísticas. (20 puntos)
+- Exportación de datos procesados. (20 puntos)
+
+## Entrega
+
+Debe entregar durante la semana 7, en un repositorio de Github o Gitlab, la siguiente documentación:
+
+1. El código fuente.
+2. Un README que explique cómo compilar y ejecutar el programa, así como una descripción de las funcionalidades implementadas.
+3. Otro archivo markdown que contenga un informe final del proyecto. Este informe debe incluir:
+   - Explicación de las estructuras utilizadas.
+   - Descripción de las funciones implementadas.
+   
+La entrega se realiza en el salón de clases. El profesor va a seguir las indicaciones del repositorio para verificar que el código se compila y ejecuta correctamente. Si el código no compila o no se ejecuta, se considerará una entrega incompleta.
+
+
+La nota final del proyecto se calculará con base en las entregas semanales. Es decir, cada entrega semanal tendrá una puntuación específica y la nota final será el promedio de las puntuaciones obtenidas en cada entrega menos las penalizaciones que reciba en la entrega final si no se cumplen las condiciones de entrega.
+
+### Restricciones
+
+- No se permite el uso de librerías externas más allá de las estándar de C++ o creadas por usted.
+- Debe utilizar arreglos dinámicos para almacenar las lecturas.
+- El código debe estar bien documentado y seguir buenas prácticas de programación.
+
+¡Buena suerte! Este proyecto simula una situación real que podría enfrentar como ingeniero.
+
+---
+
+## Cómo generar el archivo binario `.bsf`
+
+Para generar el archivo binario `.bsf`, compile y ejecute cualquiera de los programas `generate_binary_files.cpp` o `generate_binary_files_using_strings.cpp`. Estos programas generan tres archivos binarios:
+
+- **`patient_readings_simulation_tiny.bsf`**: Este archivo contiene simulaciones de lecturas para dos pacientes, con tres mediciones en total (dos de un paciente y una de otro). Este archivo es muy pequeño y se puede utilizar para pruebas iniciales. Este archivo solo contiene una lectura ECG para verificar que se está cargando correctamente el archivo binario y que se puede leer correctamente, no le servirá para probar la generación del archivo binario de anomalías ECG.
+
+- **`patient_readings_simulation_small.bsf`**: Este archivo contiene simulaciones de lecturas para dos pacientes, uno con un ECG anómalo y otro con un ECG normal. Este archivo es más pequeño y se puede utilizar para pruebas iniciales.
+- **`patient_readings_simulation.bsf`**: Este archivo contiene simulaciones de las lecturas de 1 día para cuatro pacientes. Este archivo es más grande y es el que se utilizará para la entrega final del proyecto.
+  
+Para ejecutar el programa, asegúrese de tener un compilador de C++ instalado, como `g++` o `clang++`. Luego, compile y ejecute el programa de la siguiente manera:
+
+1. Abra una terminal y navegue hasta el directorio donde se encuentra el archivo `generate_binary_files.cpp` o `generate_binary_files_using_strings.cpp`. (Visual Studio Code lo hace automáticamente al abrir el proyecto y abrir el terminal integrado).
+
+2. Compile el programa utilizando el compilador de C++ que prefiera:
+   En caso de usar g++:
+
+   ```bash
+   g++ generate_binary_files.cpp -o generate_binary_files
+   ./generate_binary_files
+   ```
+
+   En caso de usar clang++:
+
+   ```bash
+   clang++ generate_binary_files.cpp -o generate_binary_files
+   ./generate_binary_files
+   ```
+
+3. Después de ejecutar el programa, se generarán los archivos binarios `patient_readings_simulation_small.bsf` y `patient_readings_simulation.bsf` en el directorio actual.
+
+## Dónde está el archivo de configuración y de pacientes
+
+Los archivos de [configuración](/data/configuracion.txt) y de pacientes se encuentran en la carpeta [data](/data/). Ahí, encontrará un archivo llamado [pacientes_small.csv](/data/pacientes_small.csv) que contiene los datos de dos pacientes, ambos corresponderan con los pacientes del archivo generado `patient_readings_simulation_small.bsf`.
+
+Para la entrega final, se utilizará el archivo [pacientes.csv](/data/pacientes.csv) que contiene los datos de cuatro pacientes, dos con un ECG anómalo y dos con un ECG normal. Este archivo es más grande y es el que se utilizará para la entrega final del proyecto. De este archivo, aleatoriamente, se tomaron cuatro pacientes para generar el archivo `patient_readings_simulation.bsf`.
+
+## Estructuras (carpeta `libs/`)
+
+Cada estructura está en su propio archivo de cabecera:
+
+- `lectura.h`: una lectura de un sensor (tipo, y hasta dos valores).
+- `medicion.h`: una medición de un paciente (id, fecha, y un arreglo dinámico de lecturas).
+- `maquina.h`: una máquina de la UCI (id, y un arreglo dinámico de mediciones).
+- `salauci.h`: una sala de la UCI (id, y un arreglo dinámico de máquinas).
+- `configuracion.h`: un umbral de sensor, y el arreglo dinámico de umbrales del archivo de configuración.
+- `paciente.h`: los datos de un paciente.
+- `archivopacientes.h`: el arreglo dinámico de pacientes del archivo de pacientes.
+
+Desde el Sprint 4, todos los arreglos que pueden tener varios elementos (máquinas, mediciones, lecturas, pacientes, umbrales) son punteros reservados con `new[]` y liberados con `delete[]`, en vez de arreglos de tamaño fijo. No se usa `std::vector` en ningún lado.
+
+## Cómo compilar y ejecutar
+
+Desde la raíz del proyecto:
+
+```bash
+g++ -std=c++11 -Wall -Wextra -pedantic main.cpp -o main
+./main
+```
+
+El programa muestra un menú:
+
+```
+1. Cargar archivo de configuracion y datos de pacientes
+2. Leer archivo .bsf
+3. Generar reporte de anomalias
+4. Calcular estadisticas
+5. Exportar datos procesados
+6. Ejecutar pruebas
+7. Salir
+```
+
+Antes de usar las opciones 3, 4 y 5 hay que haber usado la 1 y la 2. La opción 6 corre las pruebas automáticas y avisa si algo falló.
+
+## Cómo generar el archivo binario `.bsf` (necesario para la opción 2 y para las pruebas)
+
+Ver la sección de arriba "Cómo generar el archivo binario `.bsf`". El programa usa `patient_readings_simulation_small.bsf`.
+
+## Sprint 1: cadenas y estructuras
+
+`separartokens` separa una línea en un arreglo de caracteres usando `stringstream` y `getline`, tal como el ejemplo de películas de la clase. `separarconfiguracion` y `separarpaciente` son casos particulares de esa función (usan `,` y `;` como delimitador). `recortar` quita espacios y tabs al inicio/final de cada dato, moviendo caracteres dentro del mismo arreglo (igual que el `trim` del ejemplo de archivos binarios de la clase). `lineasaconfiguracion` y `lineasapacientes` convierten un arreglo de líneas en las estructuras del proyecto, y `compararfechas` compara dos fechas en el formato "DD/MM/AAAA HH:MM:ss.sss" usando `substr` y `stoi` de `std::string`.
+
+## Sprint 2: archivos de texto
+
+`contarlineasvalidas` cuenta cuántas líneas útiles (ni vacías ni comentarios) tiene un archivo, para saber cuánto reservar con `new` antes de leerlo. `cargarconfiguracion` y `cargarpacientesarchivo` abren el archivo con `fstream`, cuentan las líneas, reservan el arreglo del tamaño exacto, y leen línea por línea con `getline`, separando y convirtiendo cada línea de inmediato (`separarconfiguracion`/`tokensaumbral` o `separarpaciente`/`tokensapaciente`).
+
+`esanomalo` compara una lectura de temperatura, presión (sistólica/diastólica) u oximetría contra los umbrales cargados (usa la función auxiliar `fueradelrango` para no repetir la misma comparación tres veces). ECG no se evalúa como anómalo aquí, según las indicaciones del taller.
+
+`generarreportepaciente` junta las mediciones de un paciente y las ordena por fecha (`obtenermedicionesordenadas`, que junta `recogermedicionespaciente` + `ordenarmedicionesporfecha` con bubble sort, igual que el ejemplo de películas), y escribe `mediciones_paciente_<id>.txt` agrupando por tipo de sensor, marcando ANOMALA/NORMAL (excepto en ECG) e incluyendo mínimo, máximo y promedio al final de cada grupo (los mínimos/máximos se actualizan con la función auxiliar `actualizarminmax`).
+
+## Sprint 3: archivos binarios
+
+`leerbsf` lee el archivo binario con `fstream` en modo `ios::in | ios::binary` y `read()`, siguiendo el formato con el que el generador escribe los datos (visto en `0_how_binary_files_work.cpp` de la clase de archivos binarios): id de sala (1 byte) → cantidad de máquinas (1 byte) → por máquina: id (1 byte) + cantidad de mediciones (4 bytes) → por medición: id de paciente (1 byte, se convierte a texto con `sprintf`) + fecha/hora (24 bytes) + cantidad de lecturas (4 bytes) → por lectura: tipo de sensor (1 byte) y su valor (8 bytes para T/O/ECG, o dos enteros de 4 bytes para presión sistólica/diastólica). Cada cantidad se lee justo antes de reservar su arreglo con `new`.
+
+`generarreporteanomalias` recorre todos los pacientes cargados y escribe `anomalias.txt` con las lecturas anómalas de T, P y O (nunca ECG), agrupadas por paciente y ordenadas cronológicamente.
+
+`esecganomalo` calcula el mínimo y el máximo de todas las lecturas ECG de un paciente y compara `|mínimo| + |máximo|` contra `|límite inferior de E| + |límite superior de E|` (usa `valorabsoluto`, hecho a mano porque `fabs` no se vio en clase).
+
+`exportarpacientesecganomalos` genera `pacientes_ecg_anomalos.dat` en binario: por cada paciente con ECG anómalo escribe su id (11 bytes de texto), la cantidad de mediciones ECG (4 bytes) y cada medición (24 bytes de fecha/hora + 8 bytes de valor).
+
+## Sprint 4: arreglos dinámicos
+
+Todas las estructuras que antes tenían un arreglo de tamaño fijo ahora tienen un puntero (`tipo* lista` o `tipo* datos`), reservado con `new[]` del tamaño exacto que hace falta. Esto sigue el mismo patrón del ejemplo `classRoom`/`student` de la clase de apuntadores (`9_pointers_inside_structures.cpp`): una estructura con un puntero adentro, reservado con `new` y liberado con `delete[]`.
+
+`liberarsala` libera toda la memoria de una `salauci` (lecturas, mediciones y máquinas) de adentro hacia afuera. `leerbsf` la llama al principio, para no perder memoria si ya había datos cargados de antes. `main` también libera todo antes de salir, y libera `conf`/`pac` antes de volver a cargarlos si se usa la opción 1 más de una vez.
+
+Las funciones que juntan mediciones de un paciente (`recogermedicionespaciente`, usada por `obtenermedicionesordenadas`) reservan su arreglo de salida con `new` del tamaño exacto (contado antes con `contarmedicionespaciente`); quien la usa debe liberarla con `delete[]` cuando termina.
+
+## Pruebas
+
+La opción 6 del menú corre `pruebas()`, que verifica la separación de configuración y pacientes, la conversión a estructuras, la comparación de fechas (incluyendo milisegundos), la detección de anomalías (normales y en ECG), la lectura del archivo real `patient_readings_simulation_small.bsf` (cantidades y contenido exacto de la primera medición, para detectar un desalineamiento de bytes), y la generación de los tres reportes. Al final libera toda la memoria que reservó. Los archivos que generan las pruebas (`mediciones_paciente_1.txt`, `anomalias.txt`, `pacientes_ecg_anomalos.dat`) quedan en la carpeta del proyecto después de correrlas; no se borran automáticamente.
+
+## Informe final
+
+El archivo [`INFORME_FINAL.md`](./INFORME_FINAL.md) explica con más detalle las estructuras y las funciones del proyecto.
