@@ -266,11 +266,11 @@ El programa muestra un menú:
 7. Salir
 ```
 
-Antes de usar las opciones 3, 4 y 5 hay que haber usado la 1 y la 2. La opción 6 corre las pruebas automáticas y avisa si algo falló.
+Antes de usar las opciones 3, 4 y 5 hay que haber usado la 1 y la 2. La opción 2 pregunta el nombre del archivo `.bsf` a cargar (por ejemplo `patient_readings_simulation_small.bsf` o `patient_readings_simulation.bsf`), así se puede probar con el archivo chico o con el grande sin cambiar el código. La opción 6 corre las pruebas automáticas y avisa si algo falló.
 
 ## Cómo generar el archivo binario `.bsf` (necesario para la opción 2 y para las pruebas)
 
-Ver la sección de arriba "Cómo generar el archivo binario `.bsf`". El programa usa `patient_readings_simulation_small.bsf`.
+Ver la sección de arriba "Cómo generar el archivo binario `.bsf`". Las pruebas (opción 6) usan `patient_readings_simulation_small.bsf`.
 
 ## Sprint 1: cadenas y estructuras
 

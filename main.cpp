@@ -1080,15 +1080,19 @@ int main() {
                 }
                 break;
 
-            case 2:
-                leerbsf("patient_readings_simulation_small.bsf", sala);
+            case 2: {
+                cout << "Nombre del archivo .bsf (por ejemplo patient_readings_simulation_small.bsf): ";
+                char nombrebsf[tamdato] = {};
+                cin >> nombrebsf;
+                leerbsf(nombrebsf, sala);
                 cargobsf = sala.cantmaq > 0;
                 if (cargobsf) {
                     cout << "Se cargaron " << sala.cantmaq << " maquinas del archivo .bsf.\n";
                 } else {
-                    cout << "No se pudo leer el archivo .bsf (primero hay que generarlo, revisa el README).\n";
+                    cout << "No se pudo leer el archivo .bsf (revise el nombre, o generelo primero, vea el README).\n";
                 }
                 break;
+            }
 
             case 3:
                 if (conf.cant == 0 || pac.cant == 0 || !cargobsf) {
